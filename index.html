@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Del dato a la decisión | ETH 550 Semana 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDF2F0; --surface:#FFFFFF; --surface-2:#F4F8F6; --ink:#12323A; --muted:#4C666D; --line:#C8D5D1;
+  --teal:#1C7F74; --teal-soft:#D3ECE7; --coral:#B8423A; --coral-soft:#F6DCD8; --amber:#9A6600; --amber-soft:#F5E7C6;
+  --indigo:#4757A8; --indigo-soft:#DFE3F6;
+  --c1:#1C7F74; --c2:#C27C00; --c3:#B8423A; --c4:#4757A8; --c5:#5F7F22;
+  --r-s:6px; --r-l:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1D21; --surface:#152A2F; --surface-2:#1B3338; --ink:#E3EEEB; --muted:#9CB4B0; --line:#2C464C;
+    --teal:#4FC2B3; --teal-soft:#173F3B; --coral:#F07A70; --coral-soft:#4A2422; --amber:#F0B94A; --amber-soft:#43361A;
+    --indigo:#97A5F2; --indigo-soft:#272F55;
+    --c1:#4FC2B3; --c2:#F0B94A; --c3:#F07A70; --c4:#97A5F2; --c5:#A9C766;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1D21; --surface:#152A2F; --surface-2:#1B3338; --ink:#E3EEEB; --muted:#9CB4B0; --line:#2C464C;
+  --teal:#4FC2B3; --teal-soft:#173F3B; --coral:#F07A70; --coral-soft:#4A2422; --amber:#F0B94A; --amber-soft:#43361A;
+  --indigo:#97A5F2; --indigo-soft:#272F55;
+  --c1:#4FC2B3; --c2:#F0B94A; --c3:#F07A70; --c4:#97A5F2; --c5:#A9C766;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.55}
+h1,h2,h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0 0 .5em}
+h2{font-size:clamp(1.6rem,2.6vw,2.2rem);font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0 0 .9em;max-width:72ch}
+a{color:var(--teal)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Encabezado */
+.top{position:sticky;top:0;z-index:10;display:flex;gap:16px;justify-content:space-between;align-items:center;padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{display:flex;flex-direction:column;line-height:1.25}
+.brand strong{font-family:"Bricolage Grotesque",sans-serif;font-size:1.02rem}
+.brand span{color:var(--muted);font-size:.88rem}
+.timer{display:flex;align-items:center;gap:8px}
+#tClock{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.6rem;font-variant-numeric:tabular-nums;min-width:4.2ch;text-align:right}
+#tClock.late{color:var(--coral)}
+.btn{border:1px solid var(--line);background:var(--surface-2);padding:8px 14px;border-radius:var(--r-s);cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{opacity:.9}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* Distribución */
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1340px;margin:0 auto}
+nav.stations{position:sticky;top:66px;align-self:start;padding:26px 14px}
+nav.stations p{font-size:.85rem;color:var(--muted);margin:0 0 10px 10px}
+nav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav ol button{width:100%;display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:6px;text-align:left;background:none;border:0;border-radius:var(--r-s);padding:9px 10px;cursor:pointer}
+nav ol button:hover{background:var(--surface-2)}
+nav ol button .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--muted)}
+nav ol button .m{font-size:.8rem;color:var(--muted)}
+nav ol button.active{background:var(--surface);box-shadow:inset 3px 0 0 var(--teal)}
+nav ol button.active .n{color:var(--teal)}
+nav ol button.now .m{color:var(--paper);background:var(--amber);padding:1px 7px;border-radius:20px}
+main{padding:30px 34px 70px;min-width:0}
+.panel{display:none}
+.panel.active{display:block}
+.lead{font-size:1.08rem;color:var(--muted)}
+@media (max-width:880px){
+  .layout{grid-template-columns:1fr}
+  nav.stations{position:static;padding:10px 12px;overflow-x:auto;border-bottom:1px solid var(--line)}
+  nav.stations p{display:none}
+  nav ol{flex-direction:row}
+  nav ol button{white-space:nowrap;grid-template-columns:auto auto auto}
+  main{padding:22px 16px 60px}
+  .top{padding:10px 14px}
+  .brand span{display:none}
+}
+
+/* Apertura */
+.hero{padding:10px 0 26px;border-bottom:1px solid var(--line);margin-bottom:26px}
+.hero h1{font-size:clamp(2.6rem,6.5vw,4.8rem);font-weight:800;letter-spacing:-.025em;margin-bottom:.3em}
+.track{display:flex;flex-wrap:wrap;gap:0;margin:22px 0 6px;padding:0;list-style:none}
+.track li{position:relative;padding:10px 26px 10px 18px;background:var(--surface);border:1px solid var(--line);margin-right:-1px;font-weight:700;font-size:.95rem}
+.track li:first-child{border-radius:var(--r-s) 0 0 var(--r-s)}
+.track li:last-child{border-radius:0 var(--r-s) var(--r-s) 0;background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.track li small{display:block;font-weight:400;color:var(--muted);font-size:.78rem}
+.track li:last-child small{color:var(--paper);opacity:.8}
+.two{display:grid;grid-template-columns:1.1fr 1fr;gap:26px}
+@media (max-width:980px){.two{grid-template-columns:1fr}}
+.agenda{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.agenda li{display:grid;grid-template-columns:60px 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.agenda li b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.05rem}
+.agenda li span{color:var(--muted);font-size:.93rem;display:block}
+.case{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:20px 22px}
+.case h3{margin-bottom:.4em}
+
+/* Bloques comunes */
+.ask{margin-top:26px;border-left:4px solid var(--amber);background:var(--amber-soft);padding:14px 18px;border-radius:0 var(--r-s) var(--r-s) 0}
+.ask strong{display:block;margin-bottom:4px}
+.ask p{margin:0}
+.concept{margin-top:22px;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--surface)}
+.concept p:last-child{margin:0}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:16px;flex-wrap:wrap}
+.msg{min-height:1.5em;font-size:.95rem}
+
+/* KDD */
+.pipeline{list-style:none;padding:0;margin:18px 0;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pipeline button{width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-s);padding:9px 10px;cursor:pointer;min-height:58px}
+.pipeline button b{font-family:"Bricolage Grotesque",sans-serif;display:block;font-size:.8rem;color:var(--muted)}
+.pipeline button span{font-weight:700;font-size:.92rem}
+.pipeline button.done{background:var(--teal-soft);border-color:var(--teal)}
+.pipeline button.cur{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pipeline button.cur b{color:var(--paper);opacity:.75}
+@media (max-width:760px){.pipeline{grid-template-columns:repeat(3,1fr)}}
+.kdd-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:1080px){.kdd-grid{grid-template-columns:1fr}}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-s);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{background:var(--surface-2);font-weight:700}
+td.issue{background:var(--amber-soft);box-shadow:inset 0 0 0 2px var(--amber)}
+td.fixed{background:var(--teal-soft);box-shadow:inset 0 0 0 2px var(--teal)}
+td.new{background:var(--indigo-soft);box-shadow:inset 0 0 0 2px var(--indigo)}
+tr.dup td{background:var(--coral-soft)}
+td.tag-si{color:var(--coral);font-weight:700}
+td.tag-no{color:var(--teal);font-weight:700}
+.explain{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:18px 20px}
+.explain dl{margin:0}
+.explain dt{font-weight:700;margin-top:10px}
+.explain dd{margin:2px 0 0;color:var(--muted)}
+.log{margin:14px 0 0;padding:12px 14px 12px 30px;background:var(--surface-2);border-radius:var(--r-s);font-size:.88rem}
+.log li{margin:2px 0}
+.legendline{display:flex;flex-wrap:wrap;gap:14px;font-size:.84rem;color:var(--muted);margin:10px 0 0}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.bars{margin-top:20px;display:grid;gap:12px;max-width:720px}
+.bar{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center}
+.bar .track2{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-s);height:30px;position:relative;overflow:hidden}
+.bar .fill{height:100%;background:var(--coral);transition:width .6s ease}
+.bar .lbl{position:absolute;left:10px;top:4px;font-size:.86rem;font-weight:700}
+.decision{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.decision{grid-template-columns:1fr}}
+.decision > div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:16px 18px}
+.decision ul{margin:0;padding-left:20px}
+
+/* Decisor */
+.decide-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;align-items:start;margin-top:18px}
+@media (max-width:1000px){.decide-grid{grid-template-columns:1fr}}
+.sc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:22px 24px}
+.sc .meta{display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted);margin-bottom:8px}
+.progress{height:6px;background:var(--surface-2);border-radius:6px;overflow:hidden;margin-bottom:18px}
+.progress i{display:block;height:100%;background:var(--teal);transition:width .3s}
+.sc .text{font-family:"Bricolage Grotesque",sans-serif;font-size:1.35rem;font-weight:700;line-height:1.3;margin-bottom:18px;max-width:40ch}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media (max-width:620px){.opts{grid-template-columns:1fr}}
+.opts button{border:1px solid var(--line);background:var(--surface-2);padding:12px;border-radius:var(--r-s);cursor:pointer;font-weight:700}
+.opts button:hover:not([disabled]){border-color:var(--ink)}
+.opts button.right{background:var(--teal-soft);border-color:var(--teal)}
+.opts button.wrong{background:var(--coral-soft);border-color:var(--coral)}
+.feedback{margin-top:16px;padding:12px 14px;border-radius:var(--r-s);background:var(--surface-2);display:none}
+.feedback.show{display:block}
+.criteria{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:18px 20px}
+.criteria ul{padding-left:20px;margin:0 0 14px}
+.criteria li{margin:3px 0}
+
+/* Laboratorios con gráfica */
+.lab{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:22px;align-items:start;margin-top:16px}
+@media (max-width:1000px){.lab{grid-template-columns:1fr}}
+.chartbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:12px}
+canvas{display:block;width:100%}
+.controls{display:grid;gap:14px}
+.controls label{display:grid;gap:4px;font-weight:700;font-size:.95rem}
+.controls select,.controls input[type=number]{padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--surface)}
+.controls input[type=range]{width:100%;accent-color:var(--teal)}
+.controls output{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--teal)}
+.costs{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:1px solid var(--line);border-radius:var(--r-s);padding:12px;margin:0}
+.costs legend{font-weight:700;padding:0 4px}
+.costs label{font-weight:400;font-size:.88rem}
+.matrix{display:grid;grid-template-columns:auto 1fr 1fr;gap:4px;font-size:.88rem}
+.matrix div{padding:8px;border-radius:var(--r-s);text-align:center}
+.matrix .h{color:var(--muted);font-weight:700;background:none}
+.matrix .ok{background:var(--teal-soft)}
+.matrix .bad{background:var(--coral-soft)}
+.matrix b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:1.4rem}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpis div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-s);padding:8px 10px}
+.kpis small{display:block;color:var(--muted);font-size:.8rem}
+.kpis b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.3rem}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.mode{display:inline-block;font-size:.85rem;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--teal-soft);color:var(--teal);margin-bottom:6px}
+.mode.test{background:var(--indigo-soft);color:var(--indigo)}
+.check{display:flex!important;grid-template-columns:none!important;align-items:center;gap:8px!important;font-weight:400!important}
+.profile{margin-top:16px}
+.profile input{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--surface)}
+
+/* Mapa del problema */
+.mapa-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:start;margin-top:16px}
+@media (max-width:1000px){.mapa-grid{grid-template-columns:1fr}}
+.cases{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.cases button{border:1px solid var(--line);background:var(--surface);padding:9px 14px;border-radius:30px;cursor:pointer}
+.cases button.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ctx{background:var(--surface-2);border-radius:var(--r-s);padding:12px 14px;font-size:.95rem}
+.form{display:grid;gap:14px}
+.form label{display:grid;gap:4px;font-weight:700;font-size:.93rem}
+.form textarea,.form input[type=text]{padding:9px 11px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--surface);resize:vertical;font-weight:400;min-height:44px}
+.form fieldset{border:1px solid var(--line);border-radius:var(--r-s);padding:12px 14px;margin:0}
+.form legend{font-weight:700;padding:0 4px}
+.form fieldset label{display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:4px 0}
+.preview{position:sticky;top:86px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:18px}
+.preview pre{white-space:pre-wrap;font-family:"Atkinson Hyperlegible",sans-serif;font-size:.88rem;background:var(--surface-2);border-radius:var(--r-s);padding:12px;max-height:420px;overflow:auto;margin:10px 0}
+.meter{height:8px;background:var(--surface-2);border-radius:8px;overflow:hidden;margin:6px 0 2px}
+.meter i{display:block;height:100%;background:var(--teal);transition:width .3s}
+
+/* Cierre */
+.quiz{display:grid;gap:16px;margin-top:16px;max-width:860px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:18px 20px}
+.q h3{font-size:1.05rem}
+.q .opts{grid-template-columns:1fr 1fr}
+@media (max-width:620px){.q .opts{grid-template-columns:1fr}}
+.q .opts button{font-weight:400;text-align:left}
+.score{position:sticky;top:76px;z-index:2;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-s);padding:10px 14px;max-width:860px;font-weight:700}
+.next{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:860px}
+@media (max-width:760px){.next{grid-template-columns:1fr}}
+.next > div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-l);padding:16px 18px}
+.next ul{margin:0;padding-left:20px}
+footer{color:var(--muted);font-size:.85rem;margin-top:40px;padding-top:14px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <strong>ETH 550 Minería de Datos y Aprendizaje Automático</strong>
+    <span>Maestría en Ciencias de Inteligencia Artificial, semana 1</span>
+  </div>
+  <div class="timer" role="timer" aria-label="Tiempo restante de la clase">
+    <span id="tClock">40:00</span>
+    <button class="btn primary" id="tStart">Iniciar clase</button>
+    <button class="btn" id="tReset">Reiniciar</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="stations" aria-label="Estaciones de la clase">
+    <p>Recorrido de 40 minutos</p>
+    <ol>
+      <li><button data-go="inicio" class="active"><span class="n">0</span><span>Apertura</span><span class="m">3 min</span></button></li>
+      <li><button data-go="kdd"><span class="n">1</span><span>Del dato al conocimiento</span><span class="m">8 min</span></button></li>
+      <li><button data-go="decide"><span class="n">2</span><span>¿Regla o modelo?</span><span class="m">7 min</span></button></li>
+      <li><button data-go="aprende"><span class="n">3</span><span>Aprender de los datos</span><span class="m">8 min</span></button></li>
+      <li><button data-go="agrupa"><span class="n">4</span><span>Agrupar sin etiquetas</span><span class="m">5 min</span></button></li>
+      <li><button data-go="mapa"><span class="n">5</span><span>Mapa del problema</span><span class="m">6 min</span></button></li>
+      <li><button data-go="cierre"><span class="n">6</span><span>Cierre</span><span class="m">3 min</span></button></li>
+    </ol>
+  </nav>
+
+  <main>
+    <!-- 0. APERTURA -->
+    <section id="inicio" class="panel active">
+      <div class="hero">
+        <h1>Del dato a la decisión</h1>
+        <p class="lead">La minería de datos no empieza en el algoritmo: empieza en una pregunta de negocio y termina en una decisión que alguien puede defender. Hoy recorremos ese camino completo con un mismo caso, sin escribir una sola línea de código.</p>
+        <ol class="track" aria-label="Proceso para convertir datos en conocimiento">
+          <li>Selección<small>qué datos sirven</small></li>
+          <li>Preprocesamiento<small>qué datos son confiables</small></li>
+          <li>Transformación<small>qué variables expresan la hipótesis</small></li>
+          <li>Minería<small>qué patrón aparece</small></li>
+          <li>Interpretación<small>qué decisión se toma y con qué límites</small></li>
+        </ol>
+      </div>
+      <div class="two">
+        <div>
+          <h3>Recorrido de la sesión</h3>
+          <ol class="agenda">
+            <li><b>3 min</b><div>Apertura<span>Pregunta inicial: ¿qué decisión de su organización se toma hoy “a ojo”?</span></div></li>
+            <li><b>8 min</b><div>Del dato al conocimiento<span>Limpiamos y analizamos 12 registros reales de una plataforma virtual.</span></div></li>
+            <li><b>7 min</b><div>¿Regla o modelo?<span>Diez situaciones: el grupo vota cuándo conviene aprendizaje automático.</span></div></li>
+            <li><b>8 min</b><div>Aprender de los datos<span>Una regla escrita a mano frente a una regla aprendida, con costo del error.</span></div></li>
+            <li><b>5 min</b><div>Agrupar sin etiquetas<span>K-Means paso a paso para descubrir perfiles de estudiantes.</span></div></li>
+            <li><b>6 min</b><div>Mapa del problema<span>En equipos, formulan objetivo, datos, actores, éxito y riesgos.</span></div></li>
+            <li><b>3 min</b><div>Cierre<span>Seis preguntas rápidas y el producto de la semana.</span></div></li>
+          </ol>
+        </div>
+        <div class="case">
+          <h3>El caso que nos acompaña</h3>
+          <p>Una institución ofrece programas virtuales en un LMS. Muchos estudiantes abandonan antes de terminar el primer módulo, y la coordinación académica quiere actuar antes de que eso ocurra.</p>
+          <p>La pregunta de negocio: <strong>¿podemos identificar a tiempo a quienes están en riesgo de desertar, para que un tutor los contacte?</strong></p>
+          <p>Las variables con las que trabajaremos son fáciles de entender para cualquier perfil: horas de conexión por semana, porcentaje de actividades entregadas, participación en foros y si el estudiante finalmente desertó.</p>
+          <button class="btn primary" data-go="kdd">Empezar por los datos</button>
+        </div>
+      </div>
+      <div class="ask"><strong>Pregunta para el grupo</strong><p>Piense en su organización: ¿qué decisión importante se toma hoy por intuición y podría apoyarse en datos que ya existen?</p></div>
+    </section>
+
+    <!-- 1. KDD -->
+    <section id="kdd" class="panel">
+      <h2>Del dato crudo al conocimiento</h2>
+      <p class="lead">Estos son 12 registros de estudiantes tal como salen del LMS. Avance por las etapas y observe qué cambia, por qué cambia y cómo se comprueba que quedó bien.</p>
+      <ol class="pipeline" id="pipe"></ol>
+      <div class="kdd-grid">
+        <div>
+          <div class="tablewrap"><table id="kddTable"></table></div>
+          <div class="legendline">
+            <span><i class="sw" style="background:var(--amber-soft);box-shadow:inset 0 0 0 2px var(--amber)"></i>Problema detectado</span>
+            <span><i class="sw" style="background:var(--coral-soft)"></i>Registro duplicado</span>
+            <span><i class="sw" style="background:var(--teal-soft);box-shadow:inset 0 0 0 2px var(--teal)"></i>Dato corregido</span>
+            <span><i class="sw" style="background:var(--indigo-soft);box-shadow:inset 0 0 0 2px var(--indigo)"></i>Variable nueva</span>
+          </div>
+        </div>
+        <aside class="explain" id="kddExplain" aria-live="polite"></aside>
+      </div>
+      <div id="kddExtra"></div>
+      <div class="nav-row">
+        <button class="btn" id="kddPrev">Etapa anterior</button>
+        <button class="btn primary" id="kddNext">Siguiente etapa</button>
+      </div>
+      <div class="ask" id="kddAsk"></div>
+    </section>
+
+    <!-- 2. DECISOR -->
+    <section id="decide" class="panel">
+      <h2>¿Regla, analítica descriptiva o aprendizaje automático?</h2>
+      <p class="lead">No todo problema necesita un modelo. Lea cada situación, pida al grupo que vote y luego elija la herramienta que mejor la resuelve.</p>
+      <div class="decide-grid">
+        <div class="sc" id="scCard" aria-live="polite"></div>
+        <aside class="criteria">
+          <h3>El aprendizaje automático aporta valor cuando…</h3>
+          <ul>
+            <li>El patrón es complejo y nadie podría escribirlo como una regla.</li>
+            <li>Hay suficientes datos históricos, idealmente con el resultado conocido.</li>
+            <li>El patrón cambia con el tiempo y conviene reaprenderlo.</li>
+            <li>Se tolera cierto margen de error y su costo es manejable.</li>
+          </ul>
+          <h3>Basta algo más simple cuando…</h3>
+          <ul>
+            <li>La lógica es explícita, legal o de política interna.</li>
+            <li>La pregunta es sobre lo que ya pasó (conteos, tendencias, tableros).</li>
+            <li>Hay muy pocos datos o el error no es aceptable.</li>
+          </ul>
+        </aside>
+      </div>
+      <div class="ask"><strong>Pregunta para el grupo</strong><p>¿Cuál fue la situación más discutida? Lo que separa una buena de una mala elección casi nunca es la técnica, sino entender el problema y el costo de equivocarse.</p></div>
+    </section>
+
+    <!-- 3. SUPERVISADO -->
+    <section id="aprende" class="panel">
+      <h2>Una regla escrita por usted frente a una regla aprendida</h2>
+      <p class="lead">Cada punto es un estudiante de cohortes anteriores, y ya sabemos si desertó. Defina una regla para alertar a los tutores, mire cuánto acierta y cuánto cuesta equivocarse. Luego deje que la máquina busque la mejor regla.</p>
+      <div class="lab">
+        <div class="chartbox">
+          <span class="mode" id="supMode">Datos de entrenamiento: 48 estudiantes</span>
+          <canvas id="supCanvas" aria-label="Gráfica de estudiantes según horas de conexión y porcentaje de entregas"></canvas>
+          <div class="legendline">
+            <span><i class="sw" style="background:var(--coral);clip-path:polygon(50% 0,100% 100%,0 100%)"></i>Desertó</span>
+            <span><i class="sw" style="background:var(--teal);border-radius:50%"></i>Terminó</span>
+            <span><i class="sw" style="background:var(--coral-soft)"></i>Zona de alerta</span>
+            <span><i class="sw" style="background:none;border:2px solid var(--ink);border-radius:50%"></i>Borde grueso: error de la regla</span>
+          </div>
+        </div>
+        <div class="controls">
+          <label>Variable de la regla
+            <select id="supVar">
+              <option value="entregas">Porcentaje de actividades entregadas</option>
+              <option value="horas">Horas de conexión por semana</option>
+            </select>
+          </label>
+          <label>Alertar si el valor es menor que <output id="supOut"></output>
+            <input type="range" id="supThr">
+          </label>
+          <fieldset class="costs">
+            <legend>¿Cuánto cuesta cada error?</legend>
+            <label>Desertó y nadie lo alertó (falso negativo)<input type="number" id="cFN" value="5" min="0" step="1"></label>
+            <label>Alerta a quien no iba a desertar (falso positivo)<input type="number" id="cFP" value="1" min="0" step="1"></label>
+          </fieldset>
+          <div class="matrix" id="supMatrix"></div>
+          <div class="kpis" id="supKpis"></div>
+          <div class="btns">
+            <button class="btn primary" id="supTrain">Que la máquina aprenda la regla</button>
+            <button class="btn" id="supTest">Probar con estudiantes nuevos</button>
+          </div>
+          <p class="msg" id="supMsg" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="concept">
+        <h3>Lo que acaba de ocurrir</h3>
+        <p>Esto es <strong>aprendizaje supervisado</strong>: los datos tienen una etiqueta (desertó o no) y la máquina busca la regla que mejor la anticipa. Pero “mejor” lo define usted: si cambia el costo de los errores, la regla aprendida cambia. Y una regla solo sirve si sigue funcionando con estudiantes que nunca vio; eso se llama <strong>generalización</strong>.</p>
+      </div>
+      <div class="ask"><strong>Pregunta para el grupo</strong><p>Suba el costo del falso negativo a 20 y vuelva a entrenar. ¿Qué pasa con el número de alertas? ¿Quién debería decidir esos costos en una institución: el equipo de datos o la dirección académica?</p></div>
+    </section>
+
+    <!-- 4. NO SUPERVISADO -->
+    <section id="agrupa" class="panel">
+      <h2>Agrupar cuando nadie ha puesto etiquetas</h2>
+      <p class="lead">Ahora no sabemos nada del resultado. Solo tenemos cómo se comportan los estudiantes. K-Means propone grupos por cercanía; las personas, con conocimiento del negocio, les dan significado.</p>
+      <div class="lab">
+        <div class="chartbox">
+          <canvas id="kmCanvas" aria-label="Gráfica de estudiantes según horas de estudio y participación en foros"></canvas>
+          <p class="msg" id="kmMsg" aria-live="polite" style="margin:10px 4px 0"></p>
+        </div>
+        <div class="controls">
+          <label>Número de grupos (k) <output id="kOut">3</output>
+            <input type="range" id="kSel" min="2" max="5" step="1" value="3">
+          </label>
+          <label class="check"><input type="checkbox" id="kScale" checked> Poner las dos variables en la misma escala antes de agrupar</label>
+          <div class="btns">
+            <button class="btn" id="kInit">Ubicar centros al azar</button>
+            <button class="btn" id="kStep">Dar un paso</button>
+            <button class="btn primary" id="kRun">Ejecutar hasta terminar</button>
+          </div>
+          <div class="kpis" id="kKpis"></div>
+          <div class="profile" id="kProfile"></div>
+        </div>
+      </div>
+      <div class="concept">
+        <h3>Cómo funciona, en dos movimientos</h3>
+        <p>Primero, cada estudiante se asigna al centro más cercano. Segundo, cada centro se mueve al promedio de su grupo. Se repite hasta que nadie cambia de grupo. Pruebe a quitar la escala: como los foros van de 0 a 20 y las horas de 0 a 10, una variable domina a la otra y los grupos se deforman. La calidad del dato decide la calidad del resultado.</p>
+      </div>
+      <div class="ask"><strong>Pregunta para el grupo</strong><p>Cuando el algoritmo termine, pongan nombre a cada grupo en la tabla. ¿Qué acción distinta tomaría la institución con cada uno?</p></div>
+    </section>
+
+    <!-- 5. MAPA DEL PROBLEMA -->
+    <section id="mapa" class="panel">
+      <h2>Mapa del problema</h2>
+      <p class="lead">Este es el producto de la semana 1. En equipos, elijan un caso y completen el mapa antes de pensar en cualquier modelo. Al final pueden copiarlo o descargarlo para su repositorio.</p>
+      <div class="cases" id="cases"></div>
+      <p class="ctx" id="ctx"></p>
+      <div class="mapa-grid">
+        <div class="form" id="form">
+          <label>Equipo o estudiante<input type="text" id="f_team"></label>
+          <label>Problema de negocio<textarea id="f_obj" rows="2"></textarea></label>
+          <label>Decisión que se tomará con el resultado<textarea id="f_dec" rows="2"></textarea></label>
+          <fieldset>
+            <legend>Tipo de solución</legend>
+            <label><input type="radio" name="f_tipo" value="Regla simple"> Regla simple</label>
+            <label><input type="radio" name="f_tipo" value="Analítica descriptiva"> Analítica descriptiva</label>
+            <label><input type="radio" name="f_tipo" value="Aprendizaje automático supervisado"> Aprendizaje automático supervisado</label>
+            <label><input type="radio" name="f_tipo" value="Aprendizaje automático no supervisado"> Aprendizaje automático no supervisado</label>
+          </fieldset>
+          <label>¿Por qué ese tipo de solución?<textarea id="f_just" rows="2"></textarea></label>
+          <label>Datos disponibles<textarea id="f_data" rows="2"></textarea></label>
+          <label>Qué se quiere predecir o descubrir<textarea id="f_target" rows="2"></textarea></label>
+          <label>Actores interesados (stakeholders)<textarea id="f_stake" rows="2"></textarea></label>
+          <label>Criterio de éxito<textarea id="f_exito" rows="2"></textarea></label>
+          <fieldset>
+            <legend>Riesgos que identifican</legend>
+            <label><input type="checkbox" name="f_risk" value="Sesgo o trato desigual a algún grupo"> Sesgo o trato desigual a algún grupo</label>
+            <label><input type="checkbox" name="f_risk" value="Privacidad de datos personales"> Privacidad de datos personales</label>
+            <label><input type="checkbox" name="f_risk" value="Fuga de información (usar datos del futuro)"> Fuga de información (usar datos del futuro)</label>
+            <label><input type="checkbox" name="f_risk" value="Alto costo de los errores"> Alto costo de los errores</label>
+            <label><input type="checkbox" name="f_risk" value="Datos insuficientes o de baja calidad"> Datos insuficientes o de baja calidad</label>
+            <label><input type="checkbox" name="f_risk" value="Dificultad para explicar el resultado"> Dificultad para explicar el resultado</label>
+          </fieldset>
+          <label>Cómo mitigarían el riesgo principal<textarea id="f_mit" rows="2"></textarea></label>
+        </div>
+        <aside class="preview">
+          <h3>Vista previa</h3>
+          <div class="meter"><i id="meter" style="width:0"></i></div>
+          <small id="meterTxt"></small>
+          <pre id="mdOut"></pre>
+          <div class="btns">
+            <button class="btn primary" id="mdCopy">Copiar el mapa</button>
+            <button class="btn" id="mdDown">Descargar .md</button>
+          </div>
+          <p class="msg" id="mdMsg" aria-live="polite"></p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 6. CIERRE -->
+    <section id="cierre" class="panel">
+      <h2>Cierre: seis preguntas rápidas</h2>
+      <p class="lead">Respondan en grupo. Cada respuesta muestra de inmediato por qué es o no es correcta.</p>
+      <div class="score" id="qScore" aria-live="polite"></div>
+      <div class="quiz" id="quiz"></div>
+      <div class="next">
+        <div>
+          <h3>Producto de la semana 1</h3>
+          <ul>
+            <li>Mapa del problema: objetivo, datos, riesgos y criterio de éxito.</li>
+            <li>Entorno configurado con los notebooks plantilla.</li>
+            <li>Repositorio inicial en GitHub con un README.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Para la semana 2</h3>
+          <p style="margin-bottom:.5em">Exploración y preprocesamiento: lo que hicimos hoy con 12 registros, pero con un conjunto de datos real.</p>
+          <ul>
+            <li><a href="https://colab.research.google.com/" target="_blank" rel="noopener">Google Colab</a></li>
+            <li><a href="https://www.kaggle.com/learn" target="_blank" rel="noopener">Kaggle Learn</a></li>
+            <li><a href="https://archive.ics.uci.edu/" target="_blank" rel="noopener">UCI Machine Learning Repository</a></li>
+          </ul>
+        </div>
+      </div>
+      <footer>Simulador didáctico para la semana 1 de ETH 550. Todos los datos son simulados con fines pedagógicos.</footer>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+const fmt=(n,d=1)=>Number(n).toLocaleString('es-CO',{maximumFractionDigits:d});
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gauss(r){let u=0,v=0;while(u===0)u=r();while(v===0)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+/* ---------- Navegación ---------- */
+const AGENDA=[{id:'inicio',min:3},{id:'kdd',min:8},{id:'decide',min:7},{id:'aprende',min:8},{id:'agrupa',min:5},{id:'mapa',min:6},{id:'cierre',min:3}];
+function go(id){
+  if(!document.getElementById(id)) id='inicio';
+  $$('.panel').forEach(p=>p.classList.toggle('active',p.id===id));
+  $$('nav [data-go]').forEach(b=>{const on=b.dataset.go===id;b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+  try{history.replaceState(null,'','#'+id);}catch(e){}
+  window.scrollTo({top:0});
+  if(id==='aprende')drawSup();
+  if(id==='agrupa')drawKm();
+}
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+
+/* ---------- Temporizador ---------- */
+const TOTAL=40*60;let left=TOTAL,tId=null,started=false;
+function renderTimer(){
+  const m=Math.floor(left/60),s=left%60;
+  $('#tClock').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  $('#tClock').classList.toggle('late',left<=300);
+  const el=(TOTAL-left)/60;let acc=0,now=null;
+  for(const a of AGENDA){acc+=a.min;if(el<acc){now=a.id;break;}}
+  $$('nav [data-go]').forEach(b=>b.classList.toggle('now',started&&b.dataset.go===now));
+}
+$('#tStart').addEventListener('click',()=>{
+  started=true;
+  if(tId){clearInterval(tId);tId=null;$('#tStart').textContent='Reanudar';}
+  else{
+    tId=setInterval(()=>{if(left>0){left--;renderTimer();}else{clearInterval(tId);tId=null;$('#tStart').textContent='Clase terminada';}},1000);
+    $('#tStart').textContent='Pausar';
+  }
+  renderTimer();
+});
+$('#tReset').addEventListener('click',()=>{clearInterval(tId);tId=null;left=TOTAL;started=false;$('#tStart').textContent='Iniciar clase';renderTimer();});
+
+/* ---------- 1. Proceso KDD ---------- */
+const RAW=[
+ {id:1,nombre:'Ana Gómez',edad:24,horas:6,entregas:90,ciudad:'Bogotá',deserto:'No'},
+ {id:2,nombre:'Luis Pérez',edad:31,horas:1,entregas:20,ciudad:'bogota',deserto:'Sí'},
+ {id:3,nombre:'Marta Ruiz',edad:28,horas:null,entregas:75,ciudad:'Medellín',deserto:'No'},
+ {id:4,nombre:'Carlos Díaz',edad:45,horas:2,entregas:30,ciudad:'Cali',deserto:'Sí'},
+ {id:5,nombre:'Sofía León',edad:22,horas:8,entregas:95,ciudad:'Medellín',deserto:'No'},
+ {id:6,nombre:'Jorge Mora',edad:37,horas:240,entregas:60,ciudad:'Bogotá',deserto:'No'},
+ {id:7,nombre:'Paula Vega',edad:29,horas:1.5,entregas:15,ciudad:'Cali',deserto:'Sí'},
+ {id:2,nombre:'Luis Pérez',edad:31,horas:1,entregas:20,ciudad:'bogota',deserto:'Sí'},
+ {id:8,nombre:'Diego Ríos',edad:33,horas:5,entregas:80,ciudad:'BOGOTÁ',deserto:'No'},
+ {id:9,nombre:'Laura Silva',edad:26,horas:0.5,entregas:10,ciudad:'Medellín',deserto:'Sí'},
+ {id:10,nombre:'Andrés Gil',edad:40,horas:4,entregas:70,ciudad:'Cali',deserto:'No'},
+ {id:11,nombre:'Elena Cruz',edad:35,horas:3,entregas:40,ciudad:'medellin',deserto:'Sí'},
+ {id:12,nombre:'Tomás Rey',edad:27,horas:7,entregas:85,ciudad:'Cali',deserto:'No'}
+];
+const COLS={id:'ID',nombre:'Nombre',edad:'Edad',horas:'Horas/semana',entregas:'% entregas',ciudad:'Ciudad',deserto:'Desertó',compromiso:'Compromiso'};
+const CANON={bogota:'Bogotá',medellin:'Medellín',cali:'Cali'};
+const key=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const nivel=e=>e<40?'Bajo':(e<70?'Medio':'Alto');
+const STAGES=[
+ {n:'Datos crudos',t:'Diagnóstico de los datos tal como llegan',
+  que:'Revisar los registros exportados del LMS antes de usarlos.',
+  porque:'Los datos son un activo crítico: si no son confiables, ninguna conclusión lo será.',
+  comp:'Contar los problemas marcados: vacíos, valores imposibles, duplicados y escrituras inconsistentes.',
+  ask:'¿Qué decisión equivocada podría tomar alguien que use esta tabla sin revisarla? Por ejemplo, ¿cuál sería el promedio de horas con el valor de 240?'},
+ {n:'Selección',t:'Elegir solo las variables útiles y legítimas',
+  que:'Retirar la columna Nombre y conservar las variables relacionadas con el objetivo.',
+  porque:'El nombre no ayuda a predecir y expone datos personales. La edad se conserva, pero se vigila: podría llevar a tratar distinto a un grupo.',
+  comp:'Cada columna que queda tiene una razón de negocio explícita.',
+  ask:'¿Qué otra variable del LMS agregaría para anticipar la deserción? ¿Cuál evitaría por razones éticas aunque “funcione”?'},
+ {n:'Preprocesamiento',t:'Curaduría: corregir lo que no es confiable',
+  que:'Eliminar el registro duplicado, reemplazar el vacío y el valor imposible por la mediana y unificar la escritura de la ciudad.',
+  porque:'Un duplicado pesa doble en cualquier cálculo; un valor de 240 horas distorsiona promedios y modelos.',
+  comp:'No queda ninguna celda marcada y cada cambio está documentado en el registro de decisiones (trazabilidad).',
+  ask:'¿Era mejor reemplazar por la mediana o eliminar esos registros? ¿Qué se gana y qué se pierde con cada opción?'},
+ {n:'Transformación',t:'Diseñar una variable que exprese una hipótesis',
+  que:'Crear la variable Compromiso a partir del % de entregas: bajo (menos de 40), medio (40 a 69) y alto (70 o más).',
+  porque:'Una buena variable traduce una hipótesis de negocio: quien deja de entregar se está desconectando.',
+  comp:'La regla de construcción es clara y solo usa información disponible en el momento de decidir, nunca la nota final ni la fecha de retiro (eso sería fuga de información).',
+  ask:'Si usáramos la “fecha del último acceso” para predecir la deserción, ¿estaríamos haciendo trampa sin querer? ¿Por qué?'},
+ {n:'Minería',t:'Buscar el patrón',
+  que:'Calcular la tasa de deserción en cada nivel de compromiso.',
+  porque:'Aquí aparece el conocimiento: una relación que no se veía en la tabla cruda.',
+  comp:'Las tasas suman correctamente y el número de estudiantes de cada grupo es visible.',
+  ask:'Antes de ver el resultado: ¿qué grupo creen que deserta más y en qué proporción?'},
+ {n:'Interpretación',t:'Convertir el patrón en una decisión con límites',
+  que:'Proponer una acción, declarar qué no se puede concluir y definir cómo se medirá el éxito.',
+  porque:'Un hallazgo sin decisión no genera valor, y una decisión sin límites declarados no es auditable.',
+  comp:'Otra persona podría repetir el análisis y llegar al mismo resultado.',
+  ask:'¿Qué le diría a la rectora si le pregunta: “¿entonces la baja entrega causa la deserción?”'}
+];
+let kStage=0;
+function buildKdd(stage){
+  let cols=['id','nombre','edad','horas','entregas','ciudad','deserto'];
+  let rows=RAW.map(r=>Object.assign({},r,{_m:{},_dup:false}));
+  const seen=new Set();
+  rows.forEach(r=>{
+    if(seen.has(r.id))r._dup=true;seen.add(r.id);
+    if(r.horas===null)r._m.horas='issue:dato vacío';
+    else if(r.horas>168)r._m.horas='issue:valor imposible, una semana tiene 168 horas';
+    if(CANON[key(r.ciudad)]!==r.ciudad)r._m.ciudad='issue:ciudad escrita de forma inconsistente ("'+r.ciudad+'")';
+  });
+  let median=null;
+  if(stage>=1)cols=cols.filter(c=>c!=='nombre');
+  if(stage>=2){
+    rows=rows.filter(r=>!r._dup);
+    const v=rows.filter(r=>r.horas!==null&&r.horas<=168).map(r=>r.horas).sort((a,b)=>a-b);
+    median=v.length%2?v[(v.length-1)/2]:(v[v.length/2-1]+v[v.length/2])/2;
+    rows.forEach(r=>{
+      if(r._m.horas){const o=r.horas;r.horas=median;r._m.horas='fixed:reemplazado por la mediana ('+fmt(median)+' h); antes '+(o===null?'vacío':o+' h');}
+      if(r._m.ciudad){const o=r.ciudad;r.ciudad=CANON[key(o)];r._m.ciudad='fixed:unificado como '+r.ciudad+' (antes "'+o+'")';}
+    });
+  }
+  if(stage>=3){cols.push('compromiso');rows.forEach(r=>{r.compromiso=nivel(r.entregas);r._m.compromiso='new:variable nueva';});}
+  return {cols,rows,median};
+}
+function showMark(type){return (type==='issue'&&kStage<2)||(type==='fixed'&&kStage===2)||(type==='new'&&kStage===3);}
+function groupsOf(rows){
+  return ['Bajo','Medio','Alto'].map(g=>{const rs=rows.filter(r=>r.compromiso===g);const d=rs.filter(r=>r.deserto==='Sí').length;return {g,n:rs.length,d,p:rs.length?d/rs.length:0};});
+}
+function renderKdd(){
+  const {cols,rows}=buildKdd(kStage);
+  $('#pipe').innerHTML=STAGES.map((s,i)=>'<li><button data-st="'+i+'" class="'+(i===kStage?'cur':(i<kStage?'done':''))+'"'+(i===kStage?' aria-current="step"':'')+'><b>'+(i===0?'Inicio':'Etapa '+i)+'</b><span>'+s.n+'</span></button></li>').join('');
+  $$('#pipe button').forEach(b=>b.addEventListener('click',()=>{kStage=+b.dataset.st;renderKdd();}));
+  let h='<thead><tr>'+cols.map(c=>'<th scope="col">'+COLS[c]+'</th>').join('')+'</tr></thead><tbody>';
+  const log=[];
+  rows.forEach(r=>{
+    const dup=r._dup&&kStage<2;
+    if(dup)log.push('ID '+r.id+': el registro aparece dos veces');
+    h+='<tr class="'+(dup?'dup':'')+'">';
+    cols.forEach(c=>{
+      let v=r[c],cls='',tip='';
+      const m=r._m[c];
+      if(m){const i=m.indexOf(':'),type=m.slice(0,i),msg=m.slice(i+1);if(showMark(type)){cls=type;tip=msg;if(type!=='new')log.push('ID '+r.id+', '+COLS[c]+': '+msg);}}
+      if(c==='deserto')cls+=' tag-'+(v==='Sí'?'si':'no');
+      const shown=v===null?'—':(typeof v==='number'&&c!=='id'?fmt(v):v);
+      h+='<td class="'+cls.trim()+'"'+(tip?' title="'+tip.replace(/"/g,'&quot;')+'"':'')+'>'+shown+'</td>';
+    });
+    h+='</tr>';
+  });
+  $('#kddTable').innerHTML=h+'</tbody>';
+  if(kStage===1)log.unshift('Columna Nombre retirada: dato personal sin valor para predecir.');
+  if(kStage===2)log.unshift('Registro duplicado del ID 2 eliminado: quedan '+rows.length+' estudiantes.');
+  if(kStage===3)log.unshift('Variable Compromiso creada para los '+rows.length+' estudiantes a partir del % de entregas.');
+  const s=STAGES[kStage];
+  const uniq=[...new Set(log)];
+  $('#kddExplain').innerHTML='<h3>'+s.t+'</h3><dl><dt>Qué se hace</dt><dd>'+s.que+'</dd><dt>Por qué se hace</dt><dd>'+s.porque+'</dd><dt>Cómo comprobar que salió bien</dt><dd>'+s.comp+'</dd></dl>'+
+    (uniq.length?'<strong style="display:block;margin-top:14px">'+(kStage<2?'Hallazgos ('+uniq.length+')':'Registro de decisiones')+'</strong><ul class="log">'+uniq.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'');
+  $('#kddAsk').innerHTML='<strong>Pregunta para el grupo</strong><p>'+s.ask+'</p>';
+  let extra='';
+  if(kStage>=4){
+    const gs=groupsOf(rows);
+    extra+='<h3 style="margin-top:24px">Tasa de deserción según el nivel de compromiso</h3><div class="bars">'+gs.map(g=>'<div class="bar"><b>'+g.g+'</b><div class="track2"><div class="fill" style="width:0" data-w="'+(g.p*100)+'"></div><span class="lbl">'+g.d+' de '+g.n+' desertaron ('+fmt(g.p*100,0)+' %)</span></div></div>').join('')+'</div>';
+  }
+  if(kStage===5){
+    extra+='<div class="decision"><div><h3>Decisión propuesta</h3><p>Activar una alerta temprana para que un tutor contacte a todo estudiante con menos de 40 % de entregas en las primeras semanas.</p><p style="margin:0"><strong>Criterio de éxito:</strong> reducir la deserción del grupo alertado frente a un grupo comparable que no recibió la intervención.</p></div><div><h3>Lo que no podemos concluir</h3><ul><li>Con 12 registros no se puede generalizar; hay que validar con datos nuevos.</li><li>Es una asociación, no una causa: algo más podría explicar ambas cosas.</li><li>Antes de usarla, revisar si la alerta trata distinto a algún grupo, por ejemplo por edad o ciudad.</li></ul></div></div>';
+  }
+  $('#kddExtra').innerHTML=extra;
+  requestAnimationFrame(()=>$$('#kddExtra .fill').forEach(f=>{f.style.width=f.dataset.w+'%';}));
+  $('#kddPrev').disabled=kStage===0;
+  $('#kddNext').disabled=kStage===STAGES.length-1;
+  $('#kddNext').textContent=kStage===STAGES.length-1?'Proceso completo':'Siguiente etapa: '+STAGES[Math.min(kStage+1,STAGES.length-1)].n;
+}
+$('#kddPrev').addEventListener('click',()=>{if(kStage>0){kStage--;renderKdd();}});
+$('#kddNext').addEventListener('click',()=>{if(kStage<STAGES.length-1){kStage++;renderKdd();}});
+renderKdd();
+
+/* ---------- 2. Decisor ---------- */
+const OPT={regla:'Regla simple',desc:'Analítica descriptiva',ml:'Aprendizaje automático'};
+const SCEN=[
+ {t:'Enviar un recordatorio a quien no haya entregado la actividad 48 horas antes del cierre.',a:'regla',w:'La condición es explícita y se conoce de antemano: fecha y estado de la entrega. Un “si… entonces” lo resuelve sin margen de error.'},
+ {t:'La coordinación quiere saber cuántos estudiantes aprobaron, por grupo, el semestre pasado.',a:'desc',w:'Es una pregunta sobre lo que ya ocurrió. Un conteo o un tablero la responde; no hay nada que predecir.'},
+ {t:'Anticipar qué estudiantes podrían desertar combinando 30 variables de comportamiento en el LMS.',a:'ml',w:'Muchas variables interactúan de formas que nadie podría escribir a mano, y existen datos históricos con el resultado conocido. Es aprendizaje supervisado.'},
+ {t:'Detectar pagos fraudulentos cuyos patrones cambian cada pocas semanas.',a:'ml',w:'Los defraudadores se adaptan. Una regla fija se vuelve obsoleta rápido; un modelo puede reentrenarse con datos recientes.'},
+ {t:'Calcular el IVA de cada factura.',a:'regla',w:'Es una fórmula legal exacta. Un modelo solo introduciría error donde no debe existir.'},
+ {t:'Mostrar en la reunión de gerencia las ventas mensuales por región.',a:'desc',w:'Describe el pasado y apoya la conversación. Un tablero bien diseñado es suficiente.'},
+ {t:'Recomendar el siguiente curso a cada uno de 50.000 usuarios según su historial.',a:'ml',w:'Hay millones de combinaciones posibles y abundantes datos de comportamiento: imposible de resolver con reglas escritas a mano.'},
+ {t:'Bloquear la cuenta después de tres intentos fallidos de contraseña.',a:'regla',w:'Es una política de seguridad definida por la organización, no un patrón por descubrir.'},
+ {t:'Agrupar clientes con comportamientos parecidos cuando no existen categorías previas.',a:'ml',w:'Es aprendizaje no supervisado (clustering): el algoritmo propone grupos y el negocio los interpreta. Lo veremos en la estación 4.'},
+ {t:'Pronosticar la demanda de un producto nuevo del que solo existen 15 registros de venta.',a:'desc',w:'Con tan pocos datos un modelo no puede generalizar. Lo prudente es analizar lo observado, usar productos similares como referencia y recoger más datos. El aprendizaje automático no siempre es viable.'}
+];
+let sIdx=0,sScore=0,sDone=false;
+function renderSc(){
+  const c=$('#scCard');
+  if(sIdx>=SCEN.length){
+    const pct=sScore/SCEN.length;
+    c.innerHTML='<div class="meta"><span>Resultado</span><span>'+sScore+' de '+SCEN.length+'</span></div><div class="progress"><i style="width:100%"></i></div><p class="text">'+(pct>=.8?'El grupo distingue muy bien cuándo vale la pena un modelo.':pct>=.5?'Buen criterio, con algunos casos para discutir.':'Vale la pena repasar los criterios de la derecha.')+'</p><p>La pregunta “¿necesito aprendizaje automático?” es la primera decisión de un proyecto de datos, y la que más dinero ahorra cuando la respuesta es no.</p><button class="btn primary" id="scAgain">Volver a empezar</button>';
+    $('#scAgain').addEventListener('click',()=>{sIdx=0;sScore=0;renderSc();});
+    return;
+  }
+  const s=SCEN[sIdx];sDone=false;
+  c.innerHTML='<div class="meta"><span>Situación '+(sIdx+1)+' de '+SCEN.length+'</span><span>Aciertos: '+sScore+'</span></div><div class="progress"><i style="width:'+(sIdx/SCEN.length*100)+'%"></i></div><p class="text">'+s.t+'</p><div class="opts">'+Object.keys(OPT).map(k=>'<button data-o="'+k+'">'+OPT[k]+'</button>').join('')+'</div><div class="feedback" id="scFb"></div><div class="nav-row"><span></span><button class="btn primary" id="scNext" disabled>'+(sIdx===SCEN.length-1?'Ver resultado':'Siguiente situación')+'</button></div>';
+  $$('#scCard .opts button').forEach(b=>b.addEventListener('click',()=>{
+    if(sDone)return;sDone=true;
+    const ok=b.dataset.o===s.a;if(ok)sScore++;
+    $$('#scCard .opts button').forEach(x=>{x.disabled=true;if(x.dataset.o===s.a)x.classList.add('right');});
+    if(!ok)b.classList.add('wrong');
+    const fb=$('#scFb');fb.innerHTML='<strong>'+(ok?'Correcto. ':'La mejor opción es '+OPT[s.a]+'. ')+'</strong>'+s.w;fb.classList.add('show');
+    $('#scNext').disabled=false;$('#scNext').focus();
+    c.querySelector('.meta span:last-child').textContent='Aciertos: '+sScore;
+  }));
+  $('#scNext').addEventListener('click',()=>{sIdx++;renderSc();});
+}
+renderSc();
+
+/* ---------- Utilidades de gráfica ---------- */
+function setupCanvas(cv,aspect){
+  const w=cv.parentElement.clientWidth-24;if(w<=0)return null;
+  const h=Math.round(clamp(w*aspect,260,520));
+  const dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.width=w+'px';cv.style.height=h+'px';
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+function axes(ctx,P,w,h,xr,yr,xl,yl,xt,yt){
+  const font='13px "Atkinson Hyperlegible", system-ui, sans-serif';
+  ctx.font=font;ctx.strokeStyle=css('--line');ctx.fillStyle=css('--muted');ctx.lineWidth=1;
+  xt.forEach(v=>{const x=P.x(v);ctx.beginPath();ctx.moveTo(x,P.t);ctx.lineTo(x,h-P.b);ctx.stroke();ctx.textAlign='center';ctx.fillText(fmt(v),x,h-P.b+16);});
+  yt.forEach(v=>{const y=P.y(v);ctx.beginPath();ctx.moveTo(P.l,y);ctx.lineTo(w-P.r,y);ctx.stroke();ctx.textAlign='right';ctx.fillText(fmt(v),P.l-6,y+4);});
+  ctx.fillStyle=css('--ink');ctx.textAlign='center';ctx.fillText(xl,P.l+(w-P.l-P.r)/2,h-6);
+  ctx.save();ctx.translate(14,P.t+(h-P.t-P.b)/2);ctx.rotate(-Math.PI/2);ctx.fillText(yl,0,0);ctx.restore();
+}
+function tri(ctx,x,y,r){ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r*.95,y+r*.75);ctx.lineTo(x-r*.95,y+r*.75);ctx.closePath();}
+
+/* ---------- 3. Aprendizaje supervisado ---------- */
+function genStudents(seed,n){
+  const r=mulberry32(seed),out=[];
+  for(let i=0;i<n;i++){
+    const h=Math.round(r()*100)/10;
+    const e=Math.round(clamp(15+7*h+(r()-.5)*50,0,100));
+    const p=1/(1+Math.exp(-(5-0.35*h-0.07*e)));
+    out.push({horas:h,entregas:e,y:r()<p?1:0});
+  }
+  return out;
+}
+const TRAIN=genStudents(7,48),TEST=genStudents(2026,48);
+const RANGE={entregas:{min:0,max:100,step:1,label:'% de entregas',unit:' %',def:30},horas:{min:0,max:10,step:0.1,label:'horas de conexión',unit:' h',def:3}};
+let supVar='entregas',supThr=30,supTestMode=false,trainedAcc=null;
+function evalRule(data,v,thr){let vp=0,fp=0,fn=0,vn=0;data.forEach(d=>{const pr=d[v]<thr;if(pr&&d.y)vp++;else if(pr)fp++;else if(d.y)fn++;else vn++;});return {vp,fp,fn,vn,acc:(vp+vn)/data.length};}
+const costs=()=>({fn:Math.max(0,+$('#cFN').value||0),fp:Math.max(0,+$('#cFP').value||0)});
+function setSlider(){const R=RANGE[supVar],s=$('#supThr');s.min=R.min;s.max=R.max;s.step=R.step;s.value=supThr;$('#supOut').textContent=fmt(supThr)+R.unit;}
+function renderSupStats(){
+  const data=supTestMode?TEST:TRAIN,m=evalRule(data,supVar,supThr),c=costs(),cost=m.fn*c.fn+m.fp*c.fp;
+  $('#supMatrix').innerHTML='<div class="h"></div><div class="h">Desertó</div><div class="h">Terminó</div>'+
+    '<div class="h">Con alerta</div><div class="ok"><b>'+m.vp+'</b>aciertos</div><div class="bad"><b>'+m.fp+'</b>alertas innecesarias</div>'+
+    '<div class="h">Sin alerta</div><div class="bad"><b>'+m.fn+'</b>desertores no detectados</div><div class="ok"><b>'+m.vn+'</b>aciertos</div>';
+  $('#supKpis').innerHTML='<div><small>Exactitud</small><b>'+fmt(m.acc*100,0)+' %</b></div><div><small>Errores</small><b>'+(m.fp+m.fn)+'</b></div><div><small>Costo total</small><b>'+fmt(cost,0)+'</b></div>';
+  $('#supMode').textContent=supTestMode?'Estudiantes nuevos: 48 que la regla nunca vio':'Datos de entrenamiento: 48 estudiantes';
+  $('#supMode').classList.toggle('test',supTestMode);
+  $('#supTest').textContent=supTestMode?'Volver a los datos de entrenamiento':'Probar con estudiantes nuevos';
+  return m;
+}
+function drawSup(){
+  const cv=$('#supCanvas'),S=setupCanvas(cv,.72);if(!S)return;
+  const {ctx,w,h}=S,P={l:52,r:14,t:14,b:44};
+  P.x=v=>P.l+v/10*(w-P.l-P.r);P.y=v=>h-P.b-v/100*(h-P.t-P.b);
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle=css('--coral-soft');
+  if(supVar==='entregas')ctx.fillRect(P.l,P.y(supThr),w-P.l-P.r,P.y(0)-P.y(supThr));
+  else ctx.fillRect(P.l,P.t,P.x(supThr)-P.l,h-P.t-P.b);
+  axes(ctx,P,w,h,null,null,'Horas de conexión por semana','% de actividades entregadas',[0,2,4,6,8,10],[0,20,40,60,80,100]);
+  ctx.strokeStyle=css('--coral');ctx.lineWidth=2.5;ctx.setLineDash([7,5]);ctx.beginPath();
+  if(supVar==='entregas'){ctx.moveTo(P.l,P.y(supThr));ctx.lineTo(w-P.r,P.y(supThr));}else{ctx.moveTo(P.x(supThr),P.t);ctx.lineTo(P.x(supThr),h-P.b);}
+  ctx.stroke();ctx.setLineDash([]);
+  const data=supTestMode?TEST:TRAIN;
+  data.forEach(d=>{
+    const x=P.x(d.horas),y=P.y(d.entregas),pr=d[supVar]<supThr,err=pr!==(d.y===1);
+    ctx.fillStyle=d.y?css('--coral'):css('--teal');
+    if(d.y){tri(ctx,x,y,7);ctx.fill();}else{ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fill();}
+    if(err){ctx.strokeStyle=css('--ink');ctx.lineWidth=2.5;if(d.y){tri(ctx,x,y,10);}else{ctx.beginPath();ctx.arc(x,y,9.5,0,Math.PI*2);}ctx.stroke();}
+  });
+}
+function supUpdate(){renderSupStats();drawSup();}
+$('#supVar').addEventListener('change',e=>{supVar=e.target.value;supThr=RANGE[supVar].def;setSlider();$('#supMsg').textContent='';supUpdate();});
+$('#supThr').addEventListener('input',e=>{supThr=+e.target.value;$('#supOut').textContent=fmt(supThr)+RANGE[supVar].unit;supUpdate();});
+['#cFN','#cFP'].forEach(id=>$(id).addEventListener('input',()=>{renderSupStats();}));
+$('#supTrain').addEventListener('click',()=>{
+  const c=costs();let best=null,count=0;
+  ['entregas','horas'].forEach(v=>{
+    const R=RANGE[v],vals=[...new Set(TRAIN.map(d=>d[v]))].sort((a,b)=>a-b);
+    const cands=[R.min].concat(vals).filter(x=>x<=R.max);
+    cands.forEach(thr=>{count++;const m=evalRule(TRAIN,v,thr),cost=m.fn*c.fn+m.fp*c.fp;if(!best||cost<best.cost||(cost===best.cost&&m.acc>best.acc))best={v,thr,cost,acc:m.acc};});
+  });
+  supVar=best.v;supThr=best.thr;supTestMode=false;trainedAcc=best.acc;$('#supVar').value=supVar;setSlider();supUpdate();
+  $('#supMsg').innerHTML='La máquina probó <strong>'+count+' reglas</strong> con los 48 estudiantes de entrenamiento y eligió: alertar si <strong>'+RANGE[supVar].label+' &lt; '+fmt(supThr)+RANGE[supVar].unit+'</strong>. Es la que produce el menor costo total ('+fmt(best.cost,0)+') con los costos que usted definió. Ahora pruébela con estudiantes nuevos.';
+});
+$('#supTest').addEventListener('click',()=>{
+  supTestMode=!supTestMode;
+  const tr=evalRule(TRAIN,supVar,supThr),te=evalRule(TEST,supVar,supThr);supUpdate();
+  if(supTestMode){
+    const diff=(tr.acc-te.acc)*100;
+    $('#supMsg').innerHTML='Con los datos de entrenamiento la regla acertaba <strong>'+fmt(tr.acc*100,0)+' %</strong>; con estudiantes nuevos acierta <strong>'+fmt(te.acc*100,0)+' %</strong>. '+(diff>8?'La caída es notable: la regla se ajustó demasiado a los casos que conocía.':'La diferencia es pequeña: la regla generaliza, aprendió un patrón y no solo memorizó casos.');
+  }else{$('#supMsg').textContent='';}
+});
+setSlider();renderSupStats();
+
+/* ---------- 4. K-Means ---------- */
+const KM=(()=>{const r=mulberry32(11),C=[[2,3.5,1,1.8],[7.3,5,1.1,2],[5,14.5,1.3,2.2]],out=[];C.forEach(c=>{for(let i=0;i<22;i++)out.push({x:clamp(c[0]+gauss(r)*c[2],0,10),y:clamp(c[1]+gauss(r)*c[3],0,20),a:-1});});return out;})();
+let kK=3,kC=null,kIter=0,kConv=false,kTimer=null;
+const sc=()=>$('#kScale').checked?{x:1/10,y:1/20}:{x:1,y:1};
+function d2(p,c,s){const dx=(p.x-c.x)*s.x,dy=(p.y-c.y)*s.y;return dx*dx+dy*dy;}
+function kColors(){return ['--c1','--c2','--c3','--c4','--c5'].map(css);}
+function kInit(){
+  stopRun();const idx=[];while(idx.length<kK){const i=Math.floor(Math.random()*KM.length);if(!idx.includes(i))idx.push(i);}
+  kC=idx.map(i=>({x:KM[i].x,y:KM[i].y}));KM.forEach(p=>p.a=-1);kIter=0;kConv=false;
+  $('#kMsg').textContent='Centros ubicados al azar. Pulse “Dar un paso” para asignar a cada estudiante el centro más cercano.';
+  kRender();
+}
+function kStep(){
+  if(!kC){kInit();return;}
+  if(kConv)return;
+  const s=sc();let changed=false;
+  KM.forEach(p=>{let b=0,bd=Infinity;kC.forEach((c,j)=>{const d=d2(p,c,s);if(d<bd){bd=d;b=j;}});if(p.a!==b){p.a=b;changed=true;}});
+  kC=kC.map((c,j)=>{const g=KM.filter(p=>p.a===j);return g.length?{x:g.reduce((a,p)=>a+p.x,0)/g.length,y:g.reduce((a,p)=>a+p.y,0)/g.length}:c;});
+  kIter++;
+  if(!changed){kConv=true;stopRun();$('#kMsg').textContent='Terminó en '+kIter+' pasos: ningún estudiante cambió de grupo. Ahora interprete los grupos en la tabla.';}
+  else $('#kMsg').textContent='Paso '+kIter+': cada estudiante se asignó al centro más cercano y cada centro se movió al promedio de su grupo.';
+  kRender();
+}
+function stopRun(){if(kTimer){clearInterval(kTimer);kTimer=null;}$('#kRun').textContent='Ejecutar hasta terminar';}
+function kRender(){
+  drawKm();
+  const s=sc();let inertia=0;if(kC)KM.forEach(p=>{if(p.a>=0)inertia+=d2(p,kC[p.a],s);});
+  $('#kKpis').innerHTML='<div><small>Grupos</small><b>'+kK+'</b></div><div><small>Pasos</small><b>'+kIter+'</b></div><div><small>Dispersión interna</small><b>'+(kIter?fmt(inertia,2):'—')+'</b></div>';
+  if(kConv){
+    const cols=kColors();
+    let t='<h3>Perfil de cada grupo</h3><div class="tablewrap"><table><thead><tr><th>Grupo</th><th>Estudiantes</th><th>Horas/semana</th><th>Mensajes en foros</th><th>Nombre que le dan</th></tr></thead><tbody>';
+    kC.forEach((c,j)=>{const n=KM.filter(p=>p.a===j).length;t+='<tr><td><i class="sw" style="background:'+cols[j]+'"></i>'+(j+1)+'</td><td>'+n+'</td><td>'+fmt(c.x)+'</td><td>'+fmt(c.y)+'</td><td><input type="text" aria-label="Nombre del grupo '+(j+1)+'" placeholder="Ej.: constantes"></td></tr>';});
+    $('#kProfile').innerHTML=t+'</tbody></table></div><p class="msg" style="margin-top:8px">La “dispersión interna” mide qué tan compactos son los grupos. Si prueba distintos valores de k, verá que siempre baja al aumentar k: por eso el número de grupos se decide con criterio de negocio, no solo con la métrica.</p>';
+  }else $('#kProfile').innerHTML='';
+}
+function drawKm(){
+  const cv=$('#kmCanvas'),S=setupCanvas(cv,.72);if(!S)return;
+  const {ctx,w,h}=S,P={l:52,r:14,t:14,b:44};
+  P.x=v=>P.l+v/10*(w-P.l-P.r);P.y=v=>h-P.b-v/20*(h-P.t-P.b);
+  ctx.clearRect(0,0,w,h);
+  axes(ctx,P,w,h,null,null,'Horas de estudio por semana','Mensajes en foros por mes',[0,2,4,6,8,10],[0,5,10,15,20]);
+  const cols=kColors(),mut=css('--muted');
+  KM.forEach(p=>{ctx.fillStyle=p.a>=0?cols[p.a]:mut;ctx.globalAlpha=p.a>=0?1:.55;ctx.beginPath();ctx.arc(P.x(p.x),P.y(p.y),6,0,Math.PI*2);ctx.fill();});
+  ctx.globalAlpha=1;
+  if(kC)kC.forEach((c,j)=>{const x=P.x(c.x),y=P.y(c.y),r=12;ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r,y);ctx.closePath();ctx.fillStyle=cols[j];ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=css('--ink');ctx.stroke();});
+}
+$('#kSel').addEventListener('input',e=>{kK=+e.target.value;$('#kOut').textContent=kK;kC=null;KM.forEach(p=>p.a=-1);kIter=0;kConv=false;stopRun();$('#kMsg').textContent='Cambió el número de grupos. Ubique de nuevo los centros.';kRender();});
+$('#kScale').addEventListener('change',()=>{if(kC){KM.forEach(p=>p.a=-1);kIter=0;kConv=false;stopRun();$('#kMsg').textContent='Cambió la escala. Pulse “Ejecutar hasta terminar” para ver cómo se reorganizan los grupos.';kRender();}});
+$('#kInit').addEventListener('click',kInit);
+$('#kStep').addEventListener('click',kStep);
+$('#kRun').addEventListener('click',()=>{
+  if(kTimer){stopRun();return;}
+  if(!kC||kConv)kInit();
+  $('#kRun').textContent='Detener';
+  kTimer=setInterval(()=>{kStep();if(kConv||kIter>40)stopRun();},550);
+});
+$('#kMsg').textContent='Los puntos grises son estudiantes sin grupo. Pulse “Ejecutar hasta terminar” o avance paso a paso.';
+kRender();
+
+/* ---------- 5. Mapa del problema ---------- */
+const CASES={
+ desercion:{t:'Deserción en formación virtual',ctx:'Una institución con 8.000 estudiantes virtuales pierde el 30 % antes de terminar el primer módulo. Tiene los registros del LMS de tres cohortes anteriores.',
+  ph:{f_obj:'Ej.: reducir la deserción en el primer módulo',f_dec:'Ej.: a quién contacta un tutor cada semana',f_just:'Ej.: muchas variables de comportamiento y resultado histórico conocido',f_data:'Ej.: accesos, entregas, foros, notas parciales de tres cohortes',f_target:'Ej.: probabilidad de desertar en las próximas dos semanas',f_stake:'Ej.: coordinación académica, tutores, estudiantes, área de TI',f_exito:'Ej.: detectar al menos 7 de cada 10 desertores con un mes de anticipación',f_mit:'Ej.: revisar que la alerta no trate distinto a estudiantes mayores'}},
+ fraude:{t:'Fraude en pagos con tarjeta',ctx:'Un banco regional procesa 2 millones de transacciones al mes; el 0,2 % son fraude. Un fraude no detectado cuesta en promedio 50 veces más que revisar una alerta.',
+  ph:{f_obj:'Ej.: disminuir las pérdidas por fraude sin molestar a los buenos clientes',f_dec:'Ej.: qué transacciones se detienen para verificación',f_just:'Ej.: patrones complejos que cambian con frecuencia',f_data:'Ej.: monto, hora, comercio, ubicación, historial del cliente',f_target:'Ej.: si una transacción es fraudulenta',f_stake:'Ej.: área de riesgo, clientes, comercios, regulador',f_exito:'Ej.: reducir pérdidas un 40 % manteniendo menos de 1 % de falsas alarmas',f_mit:'Ej.: priorizar la detección de fraude aunque aumenten las revisiones'}},
+ flota:{t:'Fallas en una flota de buses',ctx:'Un operador de transporte con 600 buses quiere anticipar fallas de motor. Los buses tienen sensores de temperatura, vibración y kilometraje desde hace dos años.',
+  ph:{f_obj:'Ej.: evitar que los buses fallen en plena ruta',f_dec:'Ej.: qué buses entran a mantenimiento esta semana',f_just:'Ej.: señales de sensores difíciles de leer a simple vista',f_data:'Ej.: temperatura, vibración, kilometraje, historial de reparaciones',f_target:'Ej.: probabilidad de falla en los próximos 15 días',f_stake:'Ej.: jefe de mantenimiento, conductores, usuarios, finanzas',f_exito:'Ej.: reducir las fallas en ruta a la mitad en seis meses',f_mit:'Ej.: validar con datos de meses posteriores para no usar información del futuro'}}
+};
+let caseId='desercion';
+const FIELDS=['f_obj','f_dec','f_just','f_data','f_target','f_stake','f_exito','f_mit'];
+function renderCases(){
+  $('#cases').innerHTML=Object.keys(CASES).map(k=>'<button data-c="'+k+'" class="'+(k===caseId?'active':'')+'" aria-pressed="'+(k===caseId)+'">'+CASES[k].t+'</button>').join('');
+  $$('#cases button').forEach(b=>b.addEventListener('click',()=>{caseId=b.dataset.c;renderCases();}));
+  const C=CASES[caseId];$('#ctx').textContent=C.ctx;
+  FIELDS.forEach(f=>{$('#'+f).placeholder=C.ph[f];});
+  $('#f_team').placeholder='Ej.: Equipo 2';
+  buildMd();
+}
+function val(id){return $('#'+id).value.trim();}
+function buildMd(){
+  const tipo=($('input[name=f_tipo]:checked')||{}).value||'';
+  const risks=$$('input[name=f_risk]:checked').map(x=>x.value);
+  const line=(t,v)=>'## '+t+'\n'+(v||'(pendiente)')+'\n\n';
+  let md='# Mapa del problema: '+CASES[caseId].t+'\n'+(val('f_team')?'Equipo: '+val('f_team')+'\n':'')+'\nContexto: '+CASES[caseId].ctx+'\n\n';
+  md+=line('Problema de negocio',val('f_obj'))+line('Decisión que se tomará',val('f_dec'))+line('Tipo de solución',tipo+(val('f_just')?'\nJustificación: '+val('f_just'):''))+line('Datos disponibles',val('f_data'))+line('Qué se quiere predecir o descubrir',val('f_target'))+line('Actores interesados',val('f_stake'))+line('Criterio de éxito',val('f_exito'))+line('Riesgos',risks.length?risks.map(r=>'- '+r).join('\n'):'')+line('Mitigación del riesgo principal',val('f_mit'));
+  $('#mdOut').textContent=md.trim();
+  const filled=FIELDS.filter(f=>val(f)).length+(tipo?1:0)+(risks.length?1:0),tot=FIELDS.length+2;
+  $('#meter').style.width=(filled/tot*100)+'%';
+  $('#meterTxt').textContent='Completado: '+filled+' de '+tot+' elementos';
+  return md;
+}
+$('#form').addEventListener('input',buildMd);
+$('#form').addEventListener('change',buildMd);
+$('#mdCopy').addEventListener('click',()=>{
+  const t=$('#mdOut').textContent;
+  const done=()=>{$('#mdMsg').textContent='Mapa copiado. Péguelo en el README de su repositorio.';};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(done,()=>fallback());}else fallback();
+  function fallback(){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){$('#mdMsg').textContent='No se pudo copiar automáticamente. Seleccione el texto de la vista previa y cópielo.';}ta.remove();}
+});
+$('#mdDown').addEventListener('click',()=>{
+  const blob=new Blob([$('#mdOut').textContent],{type:'text/markdown;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mapa-del-problema.md';document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+  $('#mdMsg').textContent='Archivo mapa-del-problema.md descargado.';
+});
+renderCases();
+
+/* ---------- 6. Cuestionario ---------- */
+const QZ=[
+ {q:'¿En qué etapa del proceso se eliminan duplicados y se tratan los valores vacíos?',o:['Selección','Preprocesamiento','Minería','Interpretación'],a:1,w:'El preprocesamiento (curaduría) corrige lo que no es confiable y documenta cada cambio para que sea trazable.'},
+ {q:'Un banco quiere bloquear toda transacción que supere el límite diario del cliente. ¿Qué conviene?',o:['Un modelo de clasificación','Un algoritmo de clustering','Una regla simple','Un tablero descriptivo'],a:2,w:'El límite ya está definido. Es una regla explícita; un modelo solo agregaría error y costo.'},
+ {q:'¿Qué distingue al aprendizaje supervisado del no supervisado?',o:['El supervisado lo revisa una persona','El supervisado tiene la respuesta conocida (etiqueta) en los datos históricos','El no supervisado no usa datos','El supervisado siempre es más preciso'],a:1,w:'En el supervisado los datos traen la etiqueta (por ejemplo, desertó o no). En el no supervisado no hay etiqueta y se buscan estructuras, como grupos.'},
+ {q:'Un modelo acierta el 98 % con los datos de entrenamiento y el 61 % con datos nuevos. ¿Qué ocurrió?',o:['Es un excelente modelo','Memorizó los casos que conocía en lugar de aprender el patrón','Faltó entrenarlo más tiempo','Los datos nuevos están mal'],a:1,w:'Es sobreajuste: el modelo no generaliza. Por eso siempre se evalúa con datos que no vio durante el entrenamiento.'},
+ {q:'Si no detectar un fraude cuesta 50 veces más que revisar una falsa alarma, ¿qué conviene priorizar?',o:['La exactitud general','Reducir las falsas alarmas a cero','Reducir los fraudes no detectados, aunque aumenten las revisiones','Usar el modelo más complejo disponible'],a:2,w:'La métrica debe alinearse al costo del error. Aquí un falso negativo es mucho más caro que un falso positivo.'},
+ {q:'Después de aplicar K-Means, ¿quién da significado a cada grupo?',o:['El algoritmo, automáticamente','Las personas, con conocimiento del negocio','La métrica de dispersión','El grupo más grande'],a:1,w:'El algoritmo agrupa por cercanía; interpretar y decidir qué hacer con cada grupo es tarea humana.'}
+];
+const qAns={};
+function renderQuiz(){
+  $('#quiz').innerHTML=QZ.map((x,i)=>'<div class="q" data-q="'+i+'"><h3>'+(i+1)+'. '+x.q+'</h3><div class="opts">'+x.o.map((o,j)=>'<button data-j="'+j+'">'+o+'</button>').join('')+'</div><div class="feedback"></div></div>').join('');
+  $$('#quiz .q').forEach(box=>{
+    const i=+box.dataset.q;
+    box.querySelectorAll('.opts button').forEach(b=>b.addEventListener('click',()=>{
+      if(qAns[i]!==undefined)return;
+      const j=+b.dataset.j,ok=j===QZ[i].a;qAns[i]=ok;
+      box.querySelectorAll('.opts button').forEach(x=>{x.disabled=true;if(+x.dataset.j===QZ[i].a)x.classList.add('right');});
+      if(!ok)b.classList.add('wrong');
+      const fb=box.querySelector('.feedback');fb.innerHTML='<strong>'+(ok?'Correcto. ':'No es esa. ')+'</strong>'+QZ[i].w;fb.classList.add('show');
+      score();
+    }));
+  });
+  score();
+}
+function score(){
+  const n=Object.keys(qAns).length,ok=Object.values(qAns).filter(Boolean).length;
+  $('#qScore').textContent=n<QZ.length?'Respondidas '+n+' de '+QZ.length+', correctas '+ok:'Resultado final: '+ok+' de '+QZ.length+' correctas. '+(ok>=5?'El grupo domina los conceptos de la semana.':'Repasen las estaciones donde hubo dudas antes de la semana 2.');
+}
+renderQuiz();
+
+/* ---------- Inicio ---------- */
+let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{drawSup();drawKm();},150);});
+const mq=window.matchMedia('(prefers-color-scheme: dark)');if(mq.addEventListener)mq.addEventListener('change',()=>{drawSup();drawKm();});
+renderTimer();
+const start=(location.hash||'').replace('#','');if(start)go(start);
+})();
+</script>
+</body>
+</html>
